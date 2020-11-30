@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <%- include('partials/htmlJs') %>
+
+    <link href="///maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="stylesheet" href="/css/styleEdit.css">
+
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="container">
+        
+        <div class="row"><br><br>
+            <div class="col-sm-8 col-sm-offset-2">
+                <div class="loader">
+            
+                    <% for(let i= 0; i < questions.length; i++){%>
+                    <div id="quiz">
+
+                        <div class="question">
+
+                            <h3><span class="label label-warning" id="qid"><%=i+1%></span>
+                                
+                                <input type="text"  class="questionInp"
+                                    value="<%= questions[i].Q %>">
+                            </h3>
+                        </div>
+                        <ul>
+
+                            <li>
+                                <input type="text"  class="choiceInp1" name="selector"
+                                    value="<%=questions[i].C[0]%>">
+
+                            </li>
+
+                            <li>
+                                <input type="text"  class="choiceInp2" name="selector"
+                                    value="<%=questions[i].C[1]%>">
+
+                            </li>
+                            <li>
+                                <input type="text"  class="choiceInp3" name="selector"
+                                    value="<%=questions[i].C[2]%>">
+                            </li>
+                        </ul>
+                        <div>
+                            <input type="number"  class="answerInp" value="<%= questions[i].A %>">
+                        </div>
+                        
+
+                        <button class="btn btn-success mt-3 editBtn" >edit Now</button>
+
+                    </div>
+                    <% } %>
+                </div>
+
+                <div class="text-muted">
+                    <span id="answer"></span>
+                </div>
+
+            </div>
+        </div>
+        
+    </div>
+
+    <%- include('partials/htmlJsFooter') %>
+
+    <script>
+        document.querySelectorAll('.editBtn').forEach(element => {
+            element.addEventListener('click', e => {
+                    e.preventDefault()
+                    // alert(e.target.getAttribute('questionid'))
+                    //const questionid = e.target.getAttribute('questionid')
+
+                    const question = e.target.parentElement.querySelector('.questionInp').value
+                    const choice1 = e.target.parentElement.querySelector('.choiceInp1').value
+                    const choice2 = e.target.parentElement.querySelector('.choiceInp2').value
+                    const choice3 = e.target.parentElement.querySelector('.choiceInp3').value
+                    const answer = e.target.parentElement.querySelector('.answerInp').value
+
+                    const sentQuestion = {
+                        question,
+                        answer,
+                        choice1,
+                        choice2,
+                        choice3
+                        
+                    };
+                    console.log(sentQuestion);
+
+                    fetch('/admin/editQuestions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                           
+                        },
+                        body: JSON.stringify(sentQuestion)
+
+                    }).then(response => {
+                        console.log(response);
+
+                        if (response.status == 200) {
+                            response.json().then(data => {
+                                console.log(data);
+                                if (data === 1) {
+                                    alert("successfully updated")
+                                } else {
+                                    alert('server error')
+                                } 
+                            }).catch(error => {
+                                console.log(error);
+                                alert("something went wrong")
+                            })
+                        }
+                    }).catch(error =>{
+                            console.log(error);
+                            alert("can not send data")
+                        })
+                
+            })
+        })
+    </script>
+
+
+
+</body>
+
+</html>

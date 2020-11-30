@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <%- include('partials/htmlJs') %>
+
+    <%- include('partials/adminCss') %>
+
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row"><br>
+        </div>
+        <div class="row"><br><br>
+            <div>
+                <div class="loader">
+
+                    <div id="quiz" style="background-color: rgb(12, 49, 12);
+                    border-radius: 15% 0 55px 55px;">
+
+                        <div class="question">
+                            <h3><span class="label label-warning" id="qid">1</span>
+
+                                <input type="text" id="question" placeholder=" Please Insert your question here "
+                                    style="width: 50vw; height: 8vh;">
+                            </h3>
+                        </div>
+                        <ul>
+                            <li>
+                                <input type="text" id="f-option" name="selector" value="1.  ">
+
+                            </li>
+
+                            <li>
+                                <input type="text" id="s-option" name="selector" value="2.  ">
+
+                            </li>
+
+                            <li>
+                                <input type="text" id="t-option" name="selector" value="3.  ">
+
+                            </li>
+                        </ul>
+                        <input type="number" id="answer" placeholder="correct answer" min="1" max="3">
+                        <br> <br>
+                        <button class="btn btn-success mt-3" id="questionSaveBtn">Save Now</button>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- show modals / succes and error modals -->
+    <div class="modal" tabindex="-1" role="dialog" id="resultModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JSCRIPT PART START -->
+    <%- include('partials/htmlJsFooter') %>
+    <script>
+        // connect the save btn 
+        document.querySelector('#questionSaveBtn').addEventListener('click', e => {
+            e.preventDefault()
+            // get the data of the input values 
+            const question = document.querySelector('#question')
+            const choice1 = document.querySelector('#f-option')
+            const choice2 = document.querySelector('#s-option')
+            const choice3 = document.querySelector('#t-option')
+            const answer = document.querySelector('#answer')
+
+            const sentQuestion = {
+                question: question.value,
+                choice1: choice1.value,
+                choice2: choice2.value,
+                choice3: choice3.value,
+                answer: answer.value
+            }
+
+            console.log(sentQuestion);
+
+            fetch('/admin/addQuestion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                    
+                },
+                body: JSON.stringify(sentQuestion)
+            }).then(response => {
+                
+                if (response.status == 200) {
+                    response.json().then(data => {
+                        
+                        switch (data) {
+                            case 1:
+
+                                showModal(false, "Success",
+                                    "the question has been saved correctly and it will be shown in question bank"
+                                )
+                                question.value = '',
+                                    choice1.value = '1.  ',
+                                    choice2.value = '2.  ',
+                                    choice3.value = '3.  ',
+                                    answer.value = ''
+                                break;
+                            case 2:
+                                showModal(true, "Error",
+                                    "Some entries is missing, make sure to enter all required data"
+                                )
+
+                                break;
+                            case 3:
+                                showModal(true, "Question title is exist",
+                                    "this question already exist, please type another question title"
+                                )
+
+                                break;
+                            default:
+                                break;
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                        showModal(true, "error", "unknown response format")
+
+                    })
+                } else {
+                    console.log('error');
+                    showModal(true, "error", "could not send the data")
+                }
+            }).catch(error => {
+                console.log(error);
+                showModal(true, "error", "could not send the data")
+            })
+
+        })
+
+        function showModal(error, title, content) {
+            const modal = document.querySelector('#resultModal')
+            const modal_header = modal.querySelector('.modal-header')
+            const modal_body = modal.querySelector('.modal-body')
+            if (error) {
+
+                modal_header.classList.add('bg-danger')
+                modal_header.classList.remove('bg-success')
+            } else {
+                modal_header.classList.remove('bg-danger')
+                modal_header.classList.add('bg-success')
+            }
+            modal_header.innerHTML = title
+            modal_body.innerHTML = '<p>' + content + '</p>'
+            $('#resultModal').modal('show')
+        }
+    </script>
+
+    <!-- JSCRIPT PART START -->
+
+
+</body>
+
+</html>

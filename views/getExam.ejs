@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <%- include('partials/htmlJs') %>
+
+    <%- include('partials/adminCss') %>
+
+    <title>Edit Quiz</title>
+</head>
+
+<body>
+    <div class="container ">
+
+        <div>
+
+
+            <div class="col-sm-8 ">
+                <br>
+                <div class="col-md-5 mb-3 col-lg-offset-6">
+                    <label for="examTitle">Title</label>
+                    <input type="text" class="form-control examTitleInp" id="examTitle"
+                        placeholder="Please enter the exam title" value="<%= exam.title %>" required>
+
+
+                </div>
+                <div class="loader ">
+
+                    <% for(let i= 0; i < exams.length; i++){%>
+                    <div id="quiz" class=" quizContainer p-2">
+
+                        <div class="question">
+
+                            <h3><span class="label label-warning" id="qid"><%=i+1%></span>
+                                
+                                <input type="text" class="questionInp" value="<%= exams[i].Q %>">
+                            </h3>
+                        </div>
+                        <ul>
+
+                            <li>
+                                <input type="text" class="choiceInp1" name="selector" value="<%=exams[i].C[0]%>">
+
+                            </li>
+
+                            <li>
+                                <input type="text" class="choiceInp2" name="selector" value="<%=exams[i].C[1]%>">
+
+                            </li>
+                            <li>
+                                <input type="text" class="choiceInp3" name="selector" value="<%=exams[i].C[2]%>">
+                            </li>
+                        </ul>
+                        <div class="col-xs-6 col-xs-offset-3">
+                            <label for="correctAnswer" style="color: black;">Correct Answer: </label>
+
+                            <input type="number" class="form-control answerInp" value="<%= exams[i].A %>" min="1" max="3" >
+                        </div>
+                        <br>
+                        
+
+                        <button class="btn btn-success mt-3 editBtn" questionid="<%=exams[i]._id%>">edit Now</button>
+                        <br>
+                        
+                        <a href="#" class="btn btn-success mt-3 showDeleteModalBtn"
+                            deleteQuestionId="<%= exams[i]._id %>">delete</a>
+                        <br>
+
+                    </div>
+                    <br>
+                    <br>
+                    <br>
+                    
+                    <% } %>
+                    &nbsp; &nbsp; &nbsp;
+                    <br>
+                    <br>
+                    <br>
+                </div>
+
+                
+
+            </div>
+        </div>
+        
+    </div>
+
+
+    <!-- show modals / succes and error modals -->
+    <div class="modal" tabindex="-1" role="dialog" id="deleteConfirmModule">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h5 class="modal-title">Are you sure?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>This Question gonna be deleted and there is no way to bring it back.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" style="background-color: red;"
+                        id="deleteQuestionBtn">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal" tabindex="-1" role="dialog" id="resultModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <%- include('partials/htmlJsFooter') %>
+
+    <script>
+        // edit the question content
+        document.querySelectorAll('.editBtn').forEach(element => {
+            element.addEventListener('click', e => {
+                e.preventDefault()
+                
+                const questionid = e.target.getAttribute('questionid')
+
+                const question = e.target.parentElement.querySelector('.questionInp').value
+                const choice1 = e.target.parentElement.querySelector('.choiceInp1').value
+                const choice2 = e.target.parentElement.querySelector('.choiceInp2').value
+                const choice3 = e.target.parentElement.querySelector('.choiceInp3').value
+                const answer = e.target.parentElement.querySelector('.answerInp').value
+
+                //NOTE this are the names of the parameters that i send to the body (check :adminRouter edit question post)
+                const sentQuestion = {
+                    question,
+                    choice1,
+                    choice2,
+                    choice3,
+                    answer,
+                    questionid
+                };
+                console.log(sentQuestion);
+
+                fetch('/editExam', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        
+                    },
+                    body: JSON.stringify(sentQuestion)
+
+                }).then(response => {
+                    console.log(response);
+
+                    if (response.status == 200) {
+                        response.json().then(data => {
+                            console.log(data);
+                            if (data === 1) {
+
+                                showModal(false, "Success update",
+                                    "the exam updates successfully"
+                                )
+                            } else if (data === 2) {
+                                showModal(true, "Empty data", "Please fil your data")
+                            } else if (data === 3) {
+                                showModal(true, "Server error",
+                                    "call the admin because of this error")
+                            }
+                        }).catch(error => {
+                            console.log(error);
+                            showModal(true, "Server error", "something went wrong")
+                        })
+                    }
+                }).catch(error => {
+                    console.log(error);
+                    showModal(true, "Error", "Could not send the data")
+                })
+
+            })
+        })
+
+
+        // delete the question content
+        let deleteQuestionId;
+        document.querySelectorAll('.showDeleteModalBtn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault()
+                $('#deleteConfirmModule').modal('show')
+                deleteQuestionId = e.target.getAttribute('deleteQuestionId');
+
+            })
+        });
+        document.querySelector('#deleteQuestionBtn').addEventListener('click', e => {
+            e.preventDefault()
+            fetch('/deleteExam', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    deleteQuestionId
+                })
+            }).then(response => {
+                //hide the delete confirmation modal
+                $('#deleteConfirmModule').modal('hide')
+                if (response.status == 200) {
+                    response.json().then(data => {
+                        if (data === 1) {
+                            document.querySelector('a[deleteQuestionId="' + deleteQuestionId +
+                                '"]').parentElement.remove()
+                            showModal(false, "Exam ", "question deleted")
+                            
+                        } else {
+                            showModal(true, "Error", "This question can not be deleted")
+                        }
+                    }).catch(error => {
+                        showModal(true, "Error",
+                            "server side error, please contact the web admin")
+                    })
+                } else {
+                    showModal(true, "Error", "can not connect to ther server")
+                }
+            }).catch(error => {
+                showModal(true, "Error", "can not connect to ther server")
+            })
+        })
+
+        function showModal(error, title, content) {
+            const modal = document.querySelector('#resultModal')
+            const modal_header = modal.querySelector('.modal-header')
+            const modal_body = modal.querySelector('.modal-body')
+            if (error) {
+
+                modal_header.classList.add('bg-danger')
+                modal_header.classList.remove('bg-success')
+            } else {
+                modal_header.classList.remove('bg-danger')
+                modal_header.classList.add('bg-success')
+            }
+            modal_header.innerHTML = title
+            modal_body.innerHTML = '<p>' + content + '</p>'
+            $('#resultModal').modal('show')
+        }
+    </script>
+
+
+</body>
+
+</html>

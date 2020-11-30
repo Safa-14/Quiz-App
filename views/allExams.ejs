@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Login V8</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->	
+<%- include('partials/loginCss') %> 
+<!--===============================================================================================-->
+</head>
+<body>
+	
+	<div class="limiter">
+		<div class="container-login100">
+			<% for(let i= 0; i < exams.length; i++){%>
+			<div class="wrap-login100">
+
+				
+				<form class="login100-form validate-form p-l-150 p-r-150 p-t-178">
+					<span class="login100-form-title">
+						<%= exams[i].title %>
+					</span>
+
+	
+					<div class="container-login100-form-btn">
+						<a href="/showExam/<%= exams[i].id %>" class="login100-form-btn showExamBtn">Show Exam</a>
+						<br> <br>
+						<br> 
+						
+						<button class="login100-form-btn showExamPathBtn" examid="<%-exams[i].id%>" >
+							Start
+						</button>
+					</div>
+
+					<br>
+					
+				</form>
+				
+			</div>
+			&nbsp; &nbsp;
+			<% } %>
+				
+		</div>
+	</div>
+	
+	
+<!-- show modals / succes and error modals -->
+	<div class="modal" tabindex="-1" role="dialog" id="resultModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<!--===============================================================================================-->
+<%- include('partials/loginJs') %> 
+<!--===============================================================================================-->
+	<!-- JSCRIPT PART START -->
+
+	<script>
+		document.querySelectorAll('.showExamPathBtn').forEach(btn => {
+			btn.addEventListener('click', e => {
+				e.preventDefault()
+				showModal(true, "this is the path: ",window.location.origin +'/exam/'+btn.getAttribute('examid'))
+				
+			})
+		})
+
+		function showModal(error,title,content) {
+            const modal = document.querySelector('#resultModal')
+            const modal_header = modal.querySelector('.modal-header')
+            const modal_body = modal.querySelector('.modal-body')
+            if (error) {
+                modal_header.classList.add('bg-danger')
+                modal_header.classList.remove('bg-success')
+            } else {
+                modal_header.classList.remove('bg-danger')
+                modal_header.classList.add('bg-success') 
+            }
+            modal_header.innerHTML= title
+            modal_body.innerHTML='<p>'+content+'</p>'
+            $('#resultModal').modal('show') 
+        }
+	</script>
+
+	<!-- JSCRIPT PART END -->
+
+</body>
+</html>

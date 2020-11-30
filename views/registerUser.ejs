@@ -1,0 +1,217 @@
+<!--
+Author: Colorlib
+Author URL: https://colorlib.com
+License: Creative Commons Attribution 3.0 Unported
+License URL: http://creativecommons.org/licenses/by/3.0/
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+	<title>Register Form</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+	<script type="application/x-javascript">
+		addEventListener("load", function () {
+			setTimeout(hideURLbar, 0);
+		}, false);
+
+		function hideURLbar() {
+			window.scrollTo(0, 1);
+		}
+	</script>
+	<!-- Custom Theme files -->
+	<link href="/css/styleRegister.css" rel="stylesheet" type="text/css" media="all" />
+	<!-- //Custom Theme files -->
+	<!-- web font -->
+	<link href="//fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i" rel="stylesheet">
+	<!-- //web font -->
+</head>
+
+<body>
+	<!-- main -->
+	<div class="main-w3layouts wrapper">
+		<h1>Creative SignUp Form</h1>
+		<div class="main-agileinfo">
+			<div class="agileits-top">
+				<form id="signup-form">
+					<input id="usernameInp" class="text" type="text" name="Username" placeholder="Username" required="">
+					<input id="emailInp" class="text email" type="email" name="email" placeholder="Email" required="">
+					<input id="passwordInp" class="text" type="password" name="password" placeholder="Password"
+						required="">
+					<input id="rePasswordInp" class="text w3lpass" type="password" name="password"
+						placeholder="Confirm Password" required="">
+					<div class="wthree-text">
+						<label class="anim">
+							<input id="agree-term" type="checkbox" class="checkbox" required="">
+							<span>I Agree To The Terms & Conditions</span>
+						</label>
+						<div class="clear"> </div>
+					</div>
+					<button class="btn black" id="registerBtn">Register</button>
+
+				</form>
+
+			</div>
+		</div>
+		<!-- copyright -->
+		<div class="colorlibcopy-agile">
+			<p>© 2018 Colorlib Signup Form. All rights reserved | Design by <a href="https://colorlib.com/"
+					target="_blank">Colorlib</a></p>
+		</div>
+		<!-- //copyright -->
+		<ul class="colorlib-bubbles">
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+		</ul>
+	</div>
+
+
+
+	<!-- show modals / succes and error modals -->
+	<div class="modal" tabindex="-1" role="dialog" id="resultModal">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Modal title</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+	
+	  
+	<!-- //main -->
+	<script>
+		
+		document.querySelector('#registerBtn').addEventListener('click', e => {
+			e.preventDefault()
+			const username = document.querySelector('#usernameInp')
+			const email = document.querySelector('#emailInp')
+			const password = document.querySelector('#passwordInp')
+			const passwordRep = document.querySelector('#rePasswordInp')
+			const agreeCheck = document.querySelector('#agree-term')
+
+			let checkValidation = {
+				check: true,
+				message: ''
+			}
+
+			if (!username.value.trim()) {
+				checkValidation.check = false
+				checkValidation.message = 'Name is empty \n'
+			}
+			if (!email.value.trim()) {
+				checkValidation.check = false
+				checkValidation.message += 'email is empty \n'
+			}
+			if (!password.value) {
+				checkValidation.check = false
+				checkValidation.message += 'password is empty \n'
+			}
+			if (password.value !== rePasswordInp.value) {
+				checkValidation.check = false
+				checkValidation.message += "password doesn't match the repassword  \n"
+			}
+			if (!agreeCheck.checked) {
+				checkValidation.check = false
+				checkValidation.message += 'you have to agree to the terms \n'
+			}
+			if (checkValidation.check) {
+				const registerData = {
+					username: username.value,
+					email: email.value,
+					password: password.value,
+					passwordRep: passwordRep.value
+				}
+
+				postData('/', registerData).then(data => {
+					console.log(data);
+					switch (data) {
+						case 1:
+							showModal(false, "Register Success", "you can go to login page...")
+							username.value = ''
+							email.value = ''
+							password.value = ''
+							passwordRep.value = ''
+							agreeCheck.checked = false
+							window.location = '/login'
+							break;
+							case 3:
+							showModal(true, "Email is registered",
+								"this email already exists")
+							break;
+						case 2:
+						showModal(true, "Server error", "Something unexpected happened. please contact the administrator")
+							break;
+						
+						
+						
+					}
+
+
+				}).catch(error => {
+					showModal(true, "Server error", "call the admin because of this error")
+				})
+			} else {
+				showModal(true, "Alert!", checkValidation.message)
+				
+			}
+		})
+
+		//fetch the registration data
+		async function postData(url = '', data = {}) {
+			return fetch(url, {
+				method: 'POST',
+				headers: {
+					"Content-type": "application/json"
+				},
+				body: JSON.stringify(data)
+			}).then(response => {
+				return response.json()
+			}).catch(error => {
+				showModal(true , "server side error" , error.message)
+			})
+		}
+
+		function showModal(error, title, content) {
+            const modal = document.querySelector('#resultModal')
+            const modal_header = modal.querySelector('.modal-header')
+            const modal_body = modal.querySelector('.modal-body')
+            if (error) {
+
+                modal_header.classList.add('bg-danger')
+                modal_header.classList.remove('bg-success')
+            } else {
+                modal_header.classList.remove('bg-danger')
+                modal_header.classList.add('bg-success')
+            }
+            modal_header.innerHTML = title
+            modal_body.innerHTML = '<p>' + content + '</p>'
+            $('#resultModal').modal('show')
+        }
+	</script>
+
+</body>
+
+</html>
